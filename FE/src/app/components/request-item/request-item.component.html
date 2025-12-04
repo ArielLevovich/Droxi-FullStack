@@ -1,0 +1,36 @@
+<div class="request-item" [class.unread]="!request.isRead">
+  <div class="request-header">
+    <div class="patient-info">
+      <img [src]="typeIcon" [alt]="request.type" class="type-icon" />
+      <span class="patient-name">{{ request.patientName }}</span>
+    </div>
+    <span class="timestamp">{{ formattedTimestamp }}</span>
+  </div>
+
+  <div class="request-description">
+    {{ request.description }}
+  </div>
+
+  <div class="request-footer">
+    <div class="footer-left">
+      <img src="assets/icons/hourglass.svg" alt="time" class="footer-icon" />
+      <span class="estimated-time">{{ estimatedTime }}</span>
+
+      @if (request.type === 'labReport' && request.panels && request.panels.length > 0) {
+        <img [src]="typeIcon" alt="panels" class="footer-icon panels-icon" />
+        <span class="panels-info">{{ panelsDisplay }}</span>
+      }
+
+      @if (request.labels && request.labels.length > 0) {
+        <img src="assets/icons/type.svg" alt="labels" class="footer-icon" />
+        @for (label of request.labels; track label) {
+          <span class="label">{{ label }}</span>
+        }
+      }
+    </div>
+    <div class="footer-right">
+      <img src="assets/icons/assign.svg" alt="assigned" class="footer-icon" />
+      <span class="assigned-to">{{ request.assignment.assignedTo }}</span>
+    </div>
+  </div>
+</div>

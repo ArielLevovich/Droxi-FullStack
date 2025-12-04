@@ -1,0 +1,106 @@
+# CHANGES.md
+
+## Implementation Overview
+
+This document describes the implementation of the Smart Inbox feature for clinicians to view prescription requests.
+
+## Backend Changes
+
+### 1. Extended Dummy Data (`BE/src/models/dummy1.model.ts`)
+- Renamed `request` array to `requests` for clarity
+- Added 5 additional request entries (IDs 11-15) to ensure vertical scrolling is required
+- Data includes a mix of all three request types: `renewal`, `freeText`, and `labReport`
+- Updated patient name for ID 4 from "Silver Cat" to "Thom Brown" to match reference image
+
+### 2. Request Service (`BE/src/request/request.service.ts`)
+- Created `InboxRequest` interface to define the shape of inbox request data
+- Implemented `getAllRequests()` method to return all requests
+- Implemented `getRequestById(id)` method to return a specific request by ID
+
+### 3. Request Controller (`BE/src/request/request.controller.ts`)
+- Added `GET /requests` endpoint to fetch all inbox requests
+- Updated `GET /requests/:id` endpoint to fetch a single request by ID
+- Both endpoints return JSON responses
+
+## Frontend Changes
+
+### 1. Interface (`FE/src/app/models/inbox-request.interface.ts`)
+- Created `RequestType` type alias for the three request types
+- Created `InboxRequest` interface matching the backend data structure
+
+### 2. Request Service (`FE/src/app/services/request.service.ts`)
+- Injectable service using Angular's HttpClient
+- `getAllRequests()` - fetches all requests from backend API
+- `getRequestById(id)` - fetches a single request by ID
+- Configured to connect to `http://localhost:3000/requests`
+
+### 3. Inbox Component (`FE/src/app/components/inbox/`)
+- Main container component for the inbox UI
+- Fixed dimensions: 409px width x 524px height as per requirements
+- Header with static "By Date" sort indicator and "8 min. ago" sync status
+- Scrollable list area with custom scrollbar styling
+- Loading, error, and empty states handled
+
+### 4. Request Item Component (`FE/src/app/components/request-item/`)
+- Reusable component for rendering individual request items
+- Displays:
+  - Type-based icon (using existing SVG assets)
+  - Patient name
+  - Timestamp formatted as `HH:mm DD/MM/YYYY`
+  - Description (with text truncation)
+  - Estimated time (formatted as seconds, minutes, or "X+ min.")
+  - Labels (for freeText requests)
+  - Panels info (for labReport requests)
+  - Assigned clinician
+
+### 5. App Configuration (`FE/src/app/app.config.ts`)
+- Added `provideHttpClient()` to enable HTTP requests
+
+### 6. Global Styles (`FE/src/styles.css`)
+- Added CSS reset for consistent rendering
+- Set global font family
+
+## Assumptions Made
+
+1. **Static Header Elements**: The "By Date" dropdown and "8 min. ago" sync indicator are static/hardcoded as the assignment notes indicate dropdowns shouldn't work (only static UI).
+
+2. **Timestamp Display**: Used `lastModifiedDate` for the timestamp display as it represents the most recent activity on the request.
+
+3. **Estimated Time Format**:
+   - Under 60 seconds: displayed as "X sec."
+   - 60-1199 seconds: displayed as "X min."
+   - 1200+ seconds (20+ minutes): displayed as "X+ min."
+
+4. **Icon Mapping**: Used the existing icons in `assets/icons/`:
+   - `labReport` → `icon_labs.svg`
+   - `renewal` → `medicine.svg`
+   - `freeText` → `message.svg`
+
+5. **Unread Highlighting**: Requests with `isRead: false` are highlighted with a light blue background.
+
+6. **CORS**: Backend already has CORS configured for all origins, so no changes needed.
+
+## How to Run
+
+### Backend
+```bash
+cd BE
+npm install
+npm run dev
+```
+Server runs on `http://localhost:3000`
+
+### Frontend
+```bash
+cd FE
+npm install
+ng serve
+```
+Application runs on `http://localhost:4200`
+
+## API Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | /requests | Returns all inbox requests |
+| GET | /requests/:id | Returns a specific request by ID |

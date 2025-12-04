@@ -1,0 +1,28 @@
+<div class="inbox-container">
+  <div class="inbox-header">
+    <div class="header-left">
+      <img src="assets/icons/menu.svg" alt="menu" class="menu-icon" />
+      <img src="assets/icons/sort-arrow-down.svg" alt="sort" class="sort-icon" />
+      <span class="sort-label">By Date</span>
+    </div>
+    <div class="header-right">
+      <img src="assets/icons/sync.svg" alt="sync" class="sync-icon" />
+      <span class="sync-label">8 min. ago</span>
+      <img src="assets/icons/minimize.svg" alt="minimize" class="minimize-icon" />
+    </div>
+  </div>
+
+  <div class="inbox-list">
+    @if (loading) {
+      <div class="loading">Loading requests...</div>
+    } @else if (error) {
+      <div class="error">{{ error }}</div>
+    } @else if (requests.length === 0) {
+      <div class="empty">No requests found.</div>
+    } @else {
+      @for (request of requests; track request.id) {
+        <app-request-item [request]="request"></app-request-item>
+      }
+    }
+  </div>
+</div>
