@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <g id="icon-chevron-big-up" transform="translate(-1224 -824)">
+    <g id="Ellipse_42" data-name="Ellipse 42" transform="translate(1224 824)" fill="#f5f6f6" stroke="#192029" stroke-width="2">
+      <circle cx="16" cy="16" r="16" stroke="none"/>
+      <circle cx="16" cy="16" r="15" fill="none"/>
+    </g>
+    <g id="chevron" transform="translate(1233.099 843.723) rotate(-90)">
+      <path id="Icon_awesome-chevron-down" data-name="Icon awesome-chevron-down" d="M6.365,7.248.222,1.788a.623.623,0,0,1,0-.954L.939.2A.827.827,0,0,1,2.01.2L6.9,4.523,11.792.2a.827.827,0,0,1,1.071,0l.716.637a.623.623,0,0,1,0,.954L7.437,7.248A.827.827,0,0,1,6.365,7.248Z" transform="translate(0 13.802) rotate(-90)" fill="#192029"/>
+    </g>
+  </g>
+</svg>
