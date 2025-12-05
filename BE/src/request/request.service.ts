@@ -5,10 +5,10 @@ export class RequestService {
     constructor() {}
 
     getAllRequests(): InboxRequest[] {
-        return requests as InboxRequest[];
+        return requests;
     }
 
     getRequestById(id: string): InboxRequest | undefined {
-        return (requests as InboxRequest[]).find((req) => req.id === id);
+        return requests.find((req) => req.id === id);
     }
 }

@@ -10,6 +10,7 @@ import {
     RenewalRequest,
     Visit,
 } from '../request/request.interface';
+import { InboxRequest } from '@droxi/shared';
 
 const metformin: Medication = {
     code: '111',
@@ -335,7 +336,7 @@ export const patientToSend: PatientProfileToSend = {
     isSmsConsent: true,
     isPortalRegistered: true,
 };
-export const requests = [
+export const requests: InboxRequest[] = [
     {
         type: 'renewal',
         id: '1',
