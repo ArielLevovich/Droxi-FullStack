@@ -1,6 +1,6 @@
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync } from '@angular/core/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
-import { of, throwError } from 'rxjs';
+import { of, throwError, Subject } from 'rxjs';
 import { InboxComponent } from './inbox.component';
 import { RequestService } from '../../services/request.service';
 import { InboxRequest } from '../../models/inbox-request.interface';
@@ -8,7 +8,7 @@ import { InboxRequest } from '../../models/inbox-request.interface';
 describe('InboxComponent', () => {
   let component: InboxComponent;
   let fixture: ComponentFixture<InboxComponent>;
-  let requestServiceSpy: jasmine.SpyObj<RequestService>;
+  let requestServiceMock: { getAllRequests: jest.Mock };
 
   const mockRequests: InboxRequest[] = [
     {
@@ -47,17 +47,19 @@ describe('InboxComponent', () => {
   ];
 
   beforeEach(async () => {
-    requestServiceSpy = jasmine.createSpyObj('RequestService', ['getAllRequests']);
+    requestServiceMock = {
+      getAllRequests: jest.fn(),
+    };
 
     await TestBed.configureTestingModule({
       imports: [InboxComponent, HttpClientTestingModule],
-      providers: [{ provide: RequestService, useValue: requestServiceSpy }],
+      providers: [{ provide: RequestService, useValue: requestServiceMock }],
     }).compileComponents();
   });
 
   describe('Loading state', () => {
     it('should show loading state initially', () => {
-      requestServiceSpy.getAllRequests.and.returnValue(of([]));
+      requestServiceMock.getAllRequests.mockReturnValue(of([]));
       fixture = TestBed.createComponent(InboxComponent);
       component = fixture.componentInstance;
 
@@ -67,17 +69,22 @@ describe('InboxComponent', () => {
     });
 
     it('should display loading message in template', () => {
-      requestServiceSpy.getAllRequests.and.returnValue(of([]));
+      const subject = new Subject<InboxRequest[]>();
+      requestServiceMock.getAllRequests.mockReturnValue(subject.asObservable());
       fixture = TestBed.createComponent(InboxComponent);
+      fixture.detectChanges();
 
       const compiled = fixture.nativeElement as HTMLElement;
       expect(compiled.querySelector('.loading')?.textContent).toContain('Loading requests...');
+
+      subject.next([]);
+      subject.complete();
     });
   });
 
   describe('Successful data loading', () => {
     beforeEach(() => {
-      requestServiceSpy.getAllRequests.and.returnValue(of(mockRequests));
+      requestServiceMock.getAllRequests.mockReturnValue(of(mockRequests));
       fixture = TestBed.createComponent(InboxComponent);
       component = fixture.componentInstance;
       fixture.detectChanges();
@@ -120,7 +127,7 @@ describe('InboxComponent', () => {
 
   describe('Error handling', () => {
     beforeEach(() => {
-      requestServiceSpy.getAllRequests.and.returnValue(throwError(() => new Error('Network error')));
+      requestServiceMock.getAllRequests.mockReturnValue(throwError(() => new Error('Network error')));
       fixture = TestBed.createComponent(InboxComponent);
       component = fixture.componentInstance;
       fixture.detectChanges();
@@ -152,7 +159,7 @@ describe('InboxComponent', () => {
 
   describe('Empty state', () => {
     beforeEach(() => {
-      requestServiceSpy.getAllRequests.and.returnValue(of([]));
+      requestServiceMock.getAllRequests.mockReturnValue(of([]));
       fixture = TestBed.createComponent(InboxComponent);
       component = fixture.componentInstance;
       fixture.detectChanges();
@@ -172,7 +179,7 @@ describe('InboxComponent', () => {
 
   describe('Sync time display', () => {
     beforeEach(() => {
-      requestServiceSpy.getAllRequests.and.returnValue(of(mockRequests));
+      requestServiceMock.getAllRequests.mockReturnValue(of(mockRequests));
       fixture = TestBed.createComponent(InboxComponent);
       component = fixture.componentInstance;
       fixture.detectChanges();
@@ -205,15 +212,16 @@ describe('InboxComponent', () => {
 
   describe('Cleanup', () => {
     it('should clear interval on destroy', fakeAsync(() => {
-      requestServiceSpy.getAllRequests.and.returnValue(of(mockRequests));
+      requestServiceMock.getAllRequests.mockReturnValue(of(mockRequests));
       fixture = TestBed.createComponent(InboxComponent);
       component = fixture.componentInstance;
       fixture.detectChanges();
 
-      const clearIntervalSpy = spyOn(window, 'clearInterval');
+      const clearIntervalSpy = jest.spyOn(window, 'clearInterval');
       component.ngOnDestroy();
 
       expect(clearIntervalSpy).toHaveBeenCalled();
+      clearIntervalSpy.mockRestore();
     }));
   });
 });

@@ -88,7 +88,7 @@ describe('RequestService', () => {
       const errorMessage = 'Server error';
 
       service.getAllRequests().subscribe({
-        next: () => fail('should have failed with server error'),
+        next: () => { throw new Error('should have failed with server error'); },
         error: (error) => {
           expect(error.status).toBe(500);
         },
@@ -116,7 +116,7 @@ describe('RequestService', () => {
 
     it('should handle 404 when request not found', () => {
       service.getRequestById('999').subscribe({
-        next: () => fail('should have failed with 404'),
+        next: () => { throw new Error('should have failed with 404'); },
         error: (error) => {
           expect(error.status).toBe(404);
         },
