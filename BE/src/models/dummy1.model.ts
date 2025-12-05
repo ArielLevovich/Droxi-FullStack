@@ -9,7 +9,7 @@ import {
     RefillRequest,
     RenewalRequest,
     Visit,
-} from '../request/request.inteface';
+} from '../request/request.interface';
 
 const metformin: Medication = {
     code: '111',
