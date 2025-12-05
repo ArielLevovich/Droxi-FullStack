@@ -4,6 +4,33 @@
 
 This document describes the implementation of the Smart Inbox feature for clinicians to view prescription requests.
 
+## Shared Package
+
+### Overview (`shared/`)
+A shared TypeScript package containing common interfaces used by both the backend and frontend applications. This ensures type consistency across the full stack.
+
+### Structure
+```
+shared/
+├── src/
+│   ├── index.ts                    # Main export barrel file
+│   └── inbox-request.interface.ts  # Shared request type definitions
+├── package.json                    # Package configuration (name: @droxi/shared)
+└── tsconfig.json                   # TypeScript configuration
+```
+
+### Shared Interfaces (`shared/src/inbox-request.interface.ts`)
+- `RequestType` - Union type for request types: `'renewal' | 'freeText' | 'labReport'`
+- `InboxRequest` - Base interface with common request properties
+- `RenewalRequest` - Extended interface for renewal-type requests
+- `FreeTextRequest` - Extended interface for free-text requests
+- `LabReportRequest` - Extended interface for lab report requests
+
+### Integration
+- **Backend**: Imports types via `@droxi/shared` package reference
+- **Frontend**: Imports types via `@droxi/shared` package reference
+- Both projects reference the shared package in their `tsconfig.json` paths
+
 ## Backend Changes
 
 ### 1. Extended Dummy Data (`BE/src/models/dummy1.model.ts`)
@@ -32,7 +59,7 @@ This document describes the implementation of the Smart Inbox feature for clinic
 - Injectable service using Angular's HttpClient
 - `getAllRequests()` - fetches all requests from backend API
 - `getRequestById(id)` - fetches a single request by ID
-- Configured to connect to `http://localhost:3000/requests`
+- Uses environment configuration for API URL (see Environment Configuration below)
 
 ### 3. Inbox Component (`FE/src/app/components/inbox/`)
 - Main container component for the inbox UI
@@ -59,6 +86,23 @@ This document describes the implementation of the Smart Inbox feature for clinic
 ### 6. Global Styles (`FE/src/styles.css`)
 - Added CSS reset for consistent rendering
 - Set global font family
+
+### 7. Environment Configuration (`FE/src/environments/`)
+Angular environment-based configuration for managing API URLs across different deployment targets.
+
+**Files:**
+- `environment.ts` - Development configuration (`apiUrl: 'http://localhost:3000'`)
+- `environment.production.ts` - Production configuration (`apiUrl: '/api'`)
+
+**angular.json Configuration:**
+- Added `fileReplacements` in production build configuration
+- Automatically swaps `environment.ts` with `environment.production.ts` during production builds
+
+**Usage:**
+```typescript
+import { environment } from '../../environments/environment';
+// Access: environment.apiUrl
+```
 
 ## Assumptions Made
 

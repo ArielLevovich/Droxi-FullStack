@@ -5,9 +5,8 @@ import { RequestService } from './request.service';
 export class RequestController implements Controller {
     path = '/requests';
     router = Router();
-    private requestService = new RequestService();
 
-    constructor() {
+    constructor(private requestService: RequestService = new RequestService()) {
         this.initializeRoutes();
     }
 

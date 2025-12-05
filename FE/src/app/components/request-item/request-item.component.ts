@@ -10,7 +10,7 @@ import { InboxRequest, RequestType } from '../../models/inbox-request.interface'
   styleUrl: './request-item.component.css'
 })
 export class RequestItemComponent {
-  @Input() request!: InboxRequest;
+  @Input({ required: true }) request!: InboxRequest;
 
   private readonly iconMap: Record<RequestType, string> = {
     labReport: 'assets/icons/icon_labs.svg',
