@@ -2,12 +2,13 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { InboxRequest } from '../models/inbox-request.interface';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class RequestService {
-  private readonly apiUrl = 'http://localhost:3000/requests';
+  private readonly apiUrl = `${environment.apiUrl}/requests`;
 
   constructor(private http: HttpClient) {}
 
