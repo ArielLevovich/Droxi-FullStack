@@ -142,6 +142,36 @@ ng serve
 ```
 Application runs on `http://localhost:4200`
 
+## Testing
+
+### Frontend Testing with Jest
+
+Migrated from Karma/Jasmine to Jest for the frontend test runner. Jest runs tests in Node.js without requiring a browser, solving headless Chrome compatibility issues in WSL environments.
+
+**Configuration Files:**
+- `jest.config.js` - Jest configuration using `jest-preset-angular`
+- `setup-jest.ts` - Test environment setup with Zone.js
+- `tsconfig.spec.json` - TypeScript configuration for tests (uses `jest` types)
+
+**Test Files:**
+- `src/app/app.component.spec.ts` - Root component tests
+- `src/app/services/request.service.spec.ts` - HTTP service tests with HttpClientTestingModule
+- `src/app/components/inbox/inbox.component.spec.ts` - Inbox component tests (loading, error, empty states)
+- `src/app/components/request-item/request-item.component.spec.ts` - Request item rendering tests
+
+**Running Tests:**
+```bash
+cd FE
+npm test        # Run all tests
+npm test -- --watch   # Watch mode
+npm test -- --coverage  # With coverage report
+```
+
+**Key Differences from Karma:**
+- Uses `jest.fn()` instead of `jasmine.createSpyObj()` for mocking
+- Uses `jest.spyOn()` instead of `spyOn()`
+- No browser required - tests run in jsdom environment
+
 ## API Endpoints
 
 | Method | Endpoint | Description |
