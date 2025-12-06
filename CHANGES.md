@@ -252,3 +252,33 @@ Analysis of `InboxRequest` interface fields and their usage in the `request-item
 | `assignment.assignDate` | Internal metadata, not clinically relevant for inbox view |
 | `assignment.grouping` | Internal categorization, not displayed to end users |
 | `prescriptionIds` | Internal IDs that don't convey meaningful information to clinicians |
+
+## UI/UX Improvements
+
+Looking at the Smart Inbox screenshots, here are polished UI/UX recommendations:
+
+### Visual Hierarchy & Color
+- **Status Indicators:** Replace generic red circles with color-coded badges (red = urgent, amber = attention, green = routine) and add a subtle priority-colored left border on each card.
+- **Accent Palette:** Warmer accents for patient interactions, cooler tones for administrative tasks to cue context at a glance.
+- **Typography:** Bold/darken patient names, lighten timestamps, and enforce a clear hierarchy: Patient Name → Task Summary → Metadata.
+
+### Information Architecture
+- **Content Grouping:** Move critical alerts (e.g., "High glucose") to a prominent line with icon + colored badge; group time estimate and doctor name together at the bottom as metadata.
+- **Separators:** Use thin dividers or spacing tokens to separate content types instead of relying solely on white space.
+- **Icons & Labels:** Use descriptive icons (pill bottle for refills, chart for lab reports, chat bubble for messages) and colored chips for categories (Medication, Lab Results, Consultation) so task type is instantly scannable.
+
+### Interaction Design
+- **Hover & Selection States:** Add soft background tint and gentle elevation on hover; show selection with an accent border or background tint.
+- **Feedback:** Subtle animation on hover/shadow changes to keep the UI feeling responsive without being distracting.
+
+### Modern Polish
+- **Spacing & Density:** Slightly increase card padding, ensure consistent intra-card spacing, and prefer light dividers or elevation over heavy borders.
+- **Card Design:** Use very subtle shadows and 4–8px radii; place cards on a light off-white canvas to lift content.
+- **Date/Time:** Make "36 min. ago" prominent with absolute time on hover; color-code age (recent = green, aging = amber, old = red).
+
+### Specific Element Tweaks
+- **Patient Names:** Bold, +1–2pt, darker color (`#1a1a1a` instead of gray).
+- **Alert Badges:** Rounded rectangles with icon + text, not floating text.
+- **Time Estimates:** Pair with clock icon and keep secondary unless critical.
+- **Lab Reports Count:** Icon + number badge instead of plain text.
+- **Doctor Assignment:** Add a small avatar thumbnail beside the name for fast recognition.
