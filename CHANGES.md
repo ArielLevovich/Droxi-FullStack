@@ -64,9 +64,15 @@ shared/
 ### 3. Inbox Component (`FE/src/app/components/inbox/`)
 - Main container component for the inbox UI
 - Fixed dimensions: 409px width x 524px height as per requirements
-- Header with static "By Date" sort indicator and "8 min. ago" sync status
+- Header with static "By Date" sort indicator and dynamic sync time display
 - Scrollable list area with custom scrollbar styling
 - Loading, error, and empty states handled
+
+**Dynamic Sync Time Display:**
+- Tracks `lastSyncTime` when requests are successfully loaded
+- Displays relative time: "Just now", "1 min. ago", "X min. ago"
+- Updates automatically every 60 seconds via `setInterval`
+- Implements `OnDestroy` lifecycle hook to clean up interval on component destruction
 
 ### 4. Request Item Component (`FE/src/app/components/request-item/`)
 - Reusable component for rendering individual request items
@@ -74,11 +80,27 @@ shared/
   - Type-based icon (using existing SVG assets)
   - Patient name
   - Timestamp formatted as `HH:mm DD/MM/YYYY`
-  - Description (with text truncation)
+  - Description (with text truncation and tooltip on hover)
   - Estimated time (formatted as seconds, minutes, or "X+ min.")
   - Labels (for freeText requests)
-  - Panels info (for labReport requests)
+  - Panels info (for labReport requests, with tooltip on hover)
   - Assigned clinician
+  - Urgent indicator icon (when `isUrgent: true`)
+  - Abnormal results indicator (when `abnormalResults` array has items)
+  - Recommendation description (when `recommendationValue === 'yes'`)
+
+**Description Parsing:**
+- Descriptions containing timestamp patterns `[MM/DD/YY]` are split and displayed on separate lines
+- Example: `[06/05/25] ref; [05/26/25] Sanity refill` renders as two lines
+- Limited to 3 visible lines with ellipsis; full text shown in tooltip on hover
+
+**Urgent Indicator:**
+- Displays `icon-urgent.svg` after the patient name when `isUrgent: true`
+- Shows "Urgent" tooltip on hover
+
+**Abnormal Results Indicator:**
+- Displays `red-info.svg` icon when `abnormalResults` array contains items
+- Custom styled tooltip on hover showing abnormal results in bold red text
 
 ### 5. App Configuration (`FE/src/app/app.config.ts`)
 - Added `provideHttpClient()` to enable HTTP requests
