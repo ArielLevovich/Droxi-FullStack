@@ -148,6 +148,14 @@ import { environment } from '../../environments/environment';
 
 ## How to Run
 
+### Shared Package (Required First)
+```bash
+cd shared
+npm install
+npm run build
+```
+This compiles the shared TypeScript interfaces that both backend and frontend depend on.
+
 ### Backend
 ```bash
 cd BE
