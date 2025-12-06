@@ -185,7 +185,7 @@ Migrated from Karma/Jasmine to Jest for the frontend test runner. Jest runs test
 ```bash
 cd FE
 npm test        # Run all tests
-npm test -- --watch   # Watch mode
+npm test -- --verbose   # Watch mode
 npm test -- --coverage  # With coverage report
 ```
 
@@ -220,3 +220,35 @@ When ready to upgrade, use: `ng update @angular/core@19 @angular/cli@19`
 |--------|----------|-------------|
 | GET | /requests | Returns all inbox requests |
 | GET | /requests/:id | Returns a specific request by ID |
+
+## InboxRequest Field Usage Analysis
+
+Analysis of `InboxRequest` interface fields and their usage in the `request-item` component.
+
+### Fields Currently Displayed
+
+| Field | Usage in Component |
+|-------|-------------------|
+| `type` | Icon selection, category label, CSS class |
+| `isRead` | Unread highlight styling |
+| `patientName` | Patient name display |
+| `lastModifiedDate` | Relative time display, formatted timestamp tooltip |
+| `description` | Multi-line description with date parsing |
+| `estimatedTimeSec` | Time estimate badge |
+| `assignment.assignedTo` | Doctor initials and name |
+| `isUrgent` | Urgent alert badge |
+| `labels` | Label chips section |
+| `panels` | Panel count badge (labReport type) |
+| `abnormalResults` | Attention alert badge |
+| `recommendation` | Recommendation text (when value is 'yes') |
+
+### Fields Not Displayed (By Design)
+
+| Field | Reason |
+|-------|--------|
+| `id` | Internal identifier, used for routing/selection, not for display |
+| `status` | Always 'new' - BE endpoint returns only new status records, no need to render |
+| `requestDate` | Not displayed - we already have `isUrgent`, `isRead`, and `abnormalResults` flags; adding more data would overload the card UI |
+| `assignment.assignDate` | Internal metadata, not clinically relevant for inbox view |
+| `assignment.grouping` | Internal categorization, not displayed to end users |
+| `prescriptionIds` | Internal IDs that don't convey meaningful information to clinicians |
