@@ -80,12 +80,100 @@ describe('RequestItemComponent', () => {
       expect(formatted).toMatch(/^\d{2}:\d{2} \d{2}\/\d{2}\/\d{4}$/);
     });
 
-    it('should display timestamp in template', () => {
+    it('should display relative time in time badge', () => {
       component.request = createMockRequest();
       fixture.detectChanges();
       const compiled = fixture.nativeElement as HTMLElement;
-      const timestamp = compiled.querySelector('.timestamp');
-      expect(timestamp?.textContent).toMatch(/^\d{2}:\d{2} \d{2}\/\d{2}\/\d{4}$/);
+      const timeBadge = compiled.querySelector('.time-badge');
+      expect(timeBadge).toBeTruthy();
+      // Should contain relative time like "X min. ago" or similar
+      expect(timeBadge?.textContent?.trim()).toBeTruthy();
+    });
+
+    it('should show absolute timestamp on hover (title attribute)', () => {
+      component.request = createMockRequest();
+      fixture.detectChanges();
+      const compiled = fixture.nativeElement as HTMLElement;
+      const timeBadge = compiled.querySelector('.time-badge');
+      expect(timeBadge?.getAttribute('title')).toMatch(/^\d{2}:\d{2} \d{2}\/\d{2}\/\d{4}$/);
+    });
+  });
+
+  describe('Relative time formatting', () => {
+    it('should return "Just now" for very recent times', () => {
+      const now = new Date();
+      component.request = createMockRequest({
+        lastModifiedDate: now.toISOString(),
+      });
+      fixture.detectChanges();
+      expect(component.relativeTime).toBe('Just now');
+    });
+
+    it('should return minutes ago for times under an hour', () => {
+      const thirtyMinsAgo = new Date(Date.now() - 30 * 60 * 1000);
+      component.request = createMockRequest({
+        lastModifiedDate: thirtyMinsAgo.toISOString(),
+      });
+      fixture.detectChanges();
+      expect(component.relativeTime).toBe('30 min. ago');
+    });
+
+    it('should return hours ago for times under a day', () => {
+      const threeHoursAgo = new Date(Date.now() - 3 * 60 * 60 * 1000);
+      component.request = createMockRequest({
+        lastModifiedDate: threeHoursAgo.toISOString(),
+      });
+      fixture.detectChanges();
+      expect(component.relativeTime).toBe('3 hr. ago');
+    });
+  });
+
+  describe('Time age classes', () => {
+    it('should return age-recent for times under 1 hour', () => {
+      const tenMinsAgo = new Date(Date.now() - 10 * 60 * 1000);
+      component.request = createMockRequest({
+        lastModifiedDate: tenMinsAgo.toISOString(),
+      });
+      fixture.detectChanges();
+      expect(component.timeAgeClass).toBe('age-recent');
+    });
+
+    it('should return age-today for times under 24 hours', () => {
+      const fiveHoursAgo = new Date(Date.now() - 5 * 60 * 60 * 1000);
+      component.request = createMockRequest({
+        lastModifiedDate: fiveHoursAgo.toISOString(),
+      });
+      fixture.detectChanges();
+      expect(component.timeAgeClass).toBe('age-today');
+    });
+
+    it('should return age-aging for times 1-3 days old', () => {
+      const twoDaysAgo = new Date(Date.now() - 48 * 60 * 60 * 1000);
+      component.request = createMockRequest({
+        lastModifiedDate: twoDaysAgo.toISOString(),
+      });
+      fixture.detectChanges();
+      expect(component.timeAgeClass).toBe('age-aging');
+    });
+
+    it('should return age-old for times over 3 days', () => {
+      const fiveDaysAgo = new Date(Date.now() - 5 * 24 * 60 * 60 * 1000);
+      component.request = createMockRequest({
+        lastModifiedDate: fiveDaysAgo.toISOString(),
+      });
+      fixture.detectChanges();
+      expect(component.timeAgeClass).toBe('age-old');
+    });
+
+    it('should apply age class to time badge in template', () => {
+      const tenMinsAgo = new Date(Date.now() - 10 * 60 * 1000);
+      component.request = createMockRequest({
+        lastModifiedDate: tenMinsAgo.toISOString(),
+      });
+      fixture.detectChanges();
+      const compiled = fixture.nativeElement as HTMLElement;
+      const timeBadge = compiled.querySelector('.time-badge');
+      expect(timeBadge?.classList.contains('age-recent')).toBe(true);
     });
   });
 
@@ -124,8 +212,8 @@ describe('RequestItemComponent', () => {
       component.request = createMockRequest({ estimatedTimeSec: 151 });
       fixture.detectChanges();
       const compiled = fixture.nativeElement as HTMLElement;
-      const time = compiled.querySelector('.estimated-time');
-      expect(time?.textContent).toContain('3 min.');
+      const metadataItems = compiled.querySelectorAll('.metadata-text');
+      expect(metadataItems[0]?.textContent).toContain('3 min.');
     });
   });
 
@@ -146,14 +234,52 @@ describe('RequestItemComponent', () => {
       expect(description?.textContent).toContain('Test description content');
     });
 
-    it('should display assigned clinician', () => {
+    it('should display assigned clinician with avatar', () => {
       component.request = createMockRequest({
         assignment: { assignDate: '2025-06-08T11:01:47.567Z', assignedTo: 'Dr. Smith' },
       });
       fixture.detectChanges();
       const compiled = fixture.nativeElement as HTMLElement;
-      const assigned = compiled.querySelector('.assigned-to');
-      expect(assigned?.textContent).toContain('Dr. Smith');
+      const doctorName = compiled.querySelector('.doctor-name');
+      const doctorAvatar = compiled.querySelector('.doctor-avatar');
+      expect(doctorName?.textContent).toContain('Dr. Smith');
+      expect(doctorAvatar).toBeTruthy();
+    });
+  });
+
+  describe('Doctor initials', () => {
+    it('should extract initials from doctor name', () => {
+      component.request = createMockRequest({
+        assignment: { assignDate: '2025-06-08T11:01:47.567Z', assignedTo: 'Dr. John Smith' },
+      });
+      fixture.detectChanges();
+      expect(component.doctorInitials).toBe('JS');
+    });
+
+    it('should handle names without Dr. prefix', () => {
+      component.request = createMockRequest({
+        assignment: { assignDate: '2025-06-08T11:01:47.567Z', assignedTo: 'Jane Doe' },
+      });
+      fixture.detectChanges();
+      expect(component.doctorInitials).toBe('JD');
+    });
+
+    it('should handle single names', () => {
+      component.request = createMockRequest({
+        assignment: { assignDate: '2025-06-08T11:01:47.567Z', assignedTo: 'Johnson' },
+      });
+      fixture.detectChanges();
+      expect(component.doctorInitials).toBe('JO');
+    });
+
+    it('should display initials in avatar', () => {
+      component.request = createMockRequest({
+        assignment: { assignDate: '2025-06-08T11:01:47.567Z', assignedTo: 'Dr. Johnson' },
+      });
+      fixture.detectChanges();
+      const compiled = fixture.nativeElement as HTMLElement;
+      const avatar = compiled.querySelector('.doctor-avatar');
+      expect(avatar?.textContent?.trim()).toBe('JO');
     });
   });
 
@@ -162,7 +288,7 @@ describe('RequestItemComponent', () => {
       component.request = createMockRequest({ isRead: false });
       fixture.detectChanges();
       const compiled = fixture.nativeElement as HTMLElement;
-      const item = compiled.querySelector('.request-item');
+      const item = compiled.querySelector('.request-card');
       expect(item?.classList.contains('unread')).toBe(true);
     });
 
@@ -170,7 +296,7 @@ describe('RequestItemComponent', () => {
       component.request = createMockRequest({ isRead: true });
       fixture.detectChanges();
       const compiled = fixture.nativeElement as HTMLElement;
-      const item = compiled.querySelector('.request-item');
+      const item = compiled.querySelector('.request-card');
       expect(item?.classList.contains('unread')).toBe(false);
     });
   });
@@ -230,15 +356,17 @@ describe('RequestItemComponent', () => {
       expect(component.panelsDisplay).toBe('');
     });
 
-    it('should render panels info in template for labReport', () => {
+    it('should render panels badge in template for labReport', () => {
       component.request = createMockRequest({
         type: 'labReport',
         panels: ['CBC w/ auto diff'],
       });
       fixture.detectChanges();
       const compiled = fixture.nativeElement as HTMLElement;
-      const panelsInfo = compiled.querySelector('.panels-info');
-      expect(panelsInfo?.textContent).toContain('CBC w/ auto diff');
+      const panelsBadge = compiled.querySelector('.panels-badge');
+      const panelsCount = compiled.querySelector('.panels-count');
+      expect(panelsBadge).toBeTruthy();
+      expect(panelsCount?.textContent?.trim()).toBe('1');
     });
 
     it('should not render panels section for non-labReport types', () => {
@@ -248,8 +376,275 @@ describe('RequestItemComponent', () => {
       });
       fixture.detectChanges();
       const compiled = fixture.nativeElement as HTMLElement;
-      const panelsInfo = compiled.querySelector('.panels-info');
-      expect(panelsInfo).toBeNull();
+      const panelsBadge = compiled.querySelector('.panels-badge');
+      expect(panelsBadge).toBeNull();
+    });
+
+    it('should return correct panels count', () => {
+      component.request = createMockRequest({
+        type: 'labReport',
+        panels: ['CBC', 'Lipid Panel', 'Metabolic Panel'],
+      });
+      fixture.detectChanges();
+      expect(component.panelsCount).toBe(3);
+    });
+
+    it('should display plural label for multiple panels', () => {
+      component.request = createMockRequest({
+        type: 'labReport',
+        panels: ['CBC', 'Lipid Panel'],
+      });
+      fixture.detectChanges();
+      const compiled = fixture.nativeElement as HTMLElement;
+      const panelsLabel = compiled.querySelector('.panels-label');
+      expect(panelsLabel?.textContent?.trim()).toBe('panels');
+    });
+
+    it('should display singular label for one panel', () => {
+      component.request = createMockRequest({
+        type: 'labReport',
+        panels: ['CBC'],
+      });
+      fixture.detectChanges();
+      const compiled = fixture.nativeElement as HTMLElement;
+      const panelsLabel = compiled.querySelector('.panels-label');
+      expect(panelsLabel?.textContent?.trim()).toBe('panel');
+    });
+  });
+
+  describe('Priority classes', () => {
+    it('should return priority-urgent for urgent requests', () => {
+      component.request = createMockRequest({ isUrgent: true });
+      fixture.detectChanges();
+      expect(component.priorityClass).toBe('priority-urgent');
+    });
+
+    it('should return priority-attention for requests with abnormal results', () => {
+      component.request = createMockRequest({
+        isUrgent: false,
+        abnormalResults: ['High glucose'],
+      });
+      fixture.detectChanges();
+      expect(component.priorityClass).toBe('priority-attention');
+    });
+
+    it('should return priority-routine for normal requests', () => {
+      component.request = createMockRequest({
+        isUrgent: false,
+        abnormalResults: [],
+      });
+      fixture.detectChanges();
+      expect(component.priorityClass).toBe('priority-routine');
+    });
+
+    it('should prioritize urgent over abnormal results', () => {
+      component.request = createMockRequest({
+        isUrgent: true,
+        abnormalResults: ['High glucose'],
+      });
+      fixture.detectChanges();
+      expect(component.priorityClass).toBe('priority-urgent');
+    });
+
+    it('should apply priority class to template', () => {
+      component.request = createMockRequest({ isUrgent: true });
+      fixture.detectChanges();
+      const compiled = fixture.nativeElement as HTMLElement;
+      const item = compiled.querySelector('.request-card');
+      expect(item?.classList.contains('priority-urgent')).toBe(true);
+    });
+  });
+
+  describe('Priority badges', () => {
+    it('should return urgent badge class for urgent requests', () => {
+      component.request = createMockRequest({ isUrgent: true });
+      fixture.detectChanges();
+      expect(component.priorityBadgeClass).toBe('urgent');
+      expect(component.priorityLabel).toBe('Urgent');
+    });
+
+    it('should return attention badge class for abnormal results', () => {
+      component.request = createMockRequest({
+        isUrgent: false,
+        abnormalResults: ['High glucose'],
+      });
+      fixture.detectChanges();
+      expect(component.priorityBadgeClass).toBe('attention');
+      expect(component.priorityLabel).toBe('Attention');
+    });
+
+    it('should return empty badge class for routine requests', () => {
+      component.request = createMockRequest({
+        isUrgent: false,
+        abnormalResults: [],
+      });
+      fixture.detectChanges();
+      expect(component.priorityBadgeClass).toBe('');
+      expect(component.priorityLabel).toBe('');
+    });
+  });
+
+  describe('Alerts section', () => {
+    it('should show alerts section for urgent requests', () => {
+      component.request = createMockRequest({ isUrgent: true });
+      fixture.detectChanges();
+      const compiled = fixture.nativeElement as HTMLElement;
+      const alertsSection = compiled.querySelector('.alerts-section');
+      expect(alertsSection).toBeTruthy();
+      const urgentAlert = compiled.querySelector('.alert-badge.urgent');
+      expect(urgentAlert).toBeTruthy();
+      expect(urgentAlert?.textContent).toContain('Urgent');
+    });
+
+    it('should show alerts section for abnormal results', () => {
+      component.request = createMockRequest({
+        isUrgent: false,
+        abnormalResults: ['High glucose', 'Low iron'],
+      });
+      fixture.detectChanges();
+      const compiled = fixture.nativeElement as HTMLElement;
+      const alertsSection = compiled.querySelector('.alerts-section');
+      expect(alertsSection).toBeTruthy();
+      const attentionAlert = compiled.querySelector('.alert-badge.attention');
+      expect(attentionAlert).toBeTruthy();
+      expect(attentionAlert?.textContent).toContain('High glucose, Low iron');
+    });
+
+    it('should not show alerts section for routine requests', () => {
+      component.request = createMockRequest({
+        isUrgent: false,
+        abnormalResults: [],
+      });
+      fixture.detectChanges();
+      const compiled = fixture.nativeElement as HTMLElement;
+      const alertsSection = compiled.querySelector('.alerts-section');
+      expect(alertsSection).toBeNull();
+    });
+
+    it('should show both urgent and abnormal alerts when both present', () => {
+      component.request = createMockRequest({
+        isUrgent: true,
+        abnormalResults: ['High glucose'],
+      });
+      fixture.detectChanges();
+      const compiled = fixture.nativeElement as HTMLElement;
+      const urgentAlert = compiled.querySelector('.alert-badge.urgent');
+      const attentionAlert = compiled.querySelector('.alert-badge.attention');
+      expect(urgentAlert).toBeTruthy();
+      expect(attentionAlert).toBeTruthy();
+    });
+  });
+
+  describe('hasAlerts getter', () => {
+    it('should return true for urgent requests', () => {
+      component.request = createMockRequest({ isUrgent: true });
+      fixture.detectChanges();
+      expect(component.hasAlerts).toBe(true);
+    });
+
+    it('should return true for requests with abnormal results', () => {
+      component.request = createMockRequest({
+        isUrgent: false,
+        abnormalResults: ['High glucose'],
+      });
+      fixture.detectChanges();
+      expect(component.hasAlerts).toBe(true);
+    });
+
+    it('should return false for routine requests', () => {
+      component.request = createMockRequest({
+        isUrgent: false,
+        abnormalResults: [],
+      });
+      fixture.detectChanges();
+      expect(component.hasAlerts).toBe(false);
+    });
+  });
+
+  describe('Type classes', () => {
+    it('should return type-renewal for renewal type', () => {
+      component.request = createMockRequest({ type: 'renewal' });
+      fixture.detectChanges();
+      expect(component.typeClass).toBe('type-renewal');
+    });
+
+    it('should return type-labReport for labReport type', () => {
+      component.request = createMockRequest({ type: 'labReport' });
+      fixture.detectChanges();
+      expect(component.typeClass).toBe('type-labReport');
+    });
+
+    it('should return type-freeText for freeText type', () => {
+      component.request = createMockRequest({ type: 'freeText' });
+      fixture.detectChanges();
+      expect(component.typeClass).toBe('type-freeText');
+    });
+
+    it('should apply type class to template', () => {
+      component.request = createMockRequest({ type: 'labReport' });
+      fixture.detectChanges();
+      const compiled = fixture.nativeElement as HTMLElement;
+      const item = compiled.querySelector('.request-card');
+      expect(item?.classList.contains('type-labReport')).toBe(true);
+    });
+
+    it('should apply type class to icon container', () => {
+      component.request = createMockRequest({ type: 'labReport' });
+      fixture.detectChanges();
+      const compiled = fixture.nativeElement as HTMLElement;
+      const iconContainer = compiled.querySelector('.type-icon-container');
+      expect(iconContainer?.classList.contains('labReport')).toBe(true);
+    });
+  });
+
+  describe('Category labels', () => {
+    it('should return Medication for renewal type', () => {
+      component.request = createMockRequest({ type: 'renewal' });
+      fixture.detectChanges();
+      expect(component.categoryLabel).toBe('Medication');
+    });
+
+    it('should return Lab Results for labReport type', () => {
+      component.request = createMockRequest({ type: 'labReport' });
+      fixture.detectChanges();
+      expect(component.categoryLabel).toBe('Lab Results');
+    });
+
+    it('should return Message for freeText type', () => {
+      component.request = createMockRequest({ type: 'freeText' });
+      fixture.detectChanges();
+      expect(component.categoryLabel).toBe('Message');
+    });
+
+    it('should return correct category class for renewal', () => {
+      component.request = createMockRequest({ type: 'renewal' });
+      fixture.detectChanges();
+      expect(component.categoryClass).toBe('category-renewal');
+    });
+
+    it('should return correct category class for labReport', () => {
+      component.request = createMockRequest({ type: 'labReport' });
+      fixture.detectChanges();
+      expect(component.categoryClass).toBe('category-labReport');
+    });
+
+    it('should render category chip in template', () => {
+      component.request = createMockRequest({ type: 'renewal' });
+      fixture.detectChanges();
+      const compiled = fixture.nativeElement as HTMLElement;
+      const chip = compiled.querySelector('.category-chip');
+      expect(chip).toBeTruthy();
+      expect(chip?.textContent?.trim()).toBe('Medication');
+      expect(chip?.classList.contains('category-renewal')).toBe(true);
+    });
+
+    it('should render labReport category chip with correct styling', () => {
+      component.request = createMockRequest({ type: 'labReport' });
+      fixture.detectChanges();
+      const compiled = fixture.nativeElement as HTMLElement;
+      const chip = compiled.querySelector('.category-chip');
+      expect(chip?.textContent?.trim()).toBe('Lab Results');
+      expect(chip?.classList.contains('category-labReport')).toBe(true);
     });
   });
 });

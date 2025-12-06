@@ -1,23 +1,25 @@
 .inbox-container {
   width: 409px;
   height: 524px;
-  border: 1px solid #e0e0e0;
-  border-radius: 12px;
-  background-color: #fff;
+  border: none;
+  border-radius: 16px;
+  background-color: #f5f6f8;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
 .inbox-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px 16px;
-  border-bottom: 1px solid #e8e8e8;
-  background-color: #fafafa;
+  padding: 14px 16px;
+  border-bottom: none;
+  background-color: #ffffff;
   flex-shrink: 0;
+  border-radius: 16px 16px 0 0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .header-left {
@@ -63,6 +65,8 @@
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
+  padding: 4px 0;
+  background-color: #f5f6f8;
 }
 
 .inbox-list::-webkit-scrollbar {
@@ -70,16 +74,16 @@
 }
 
 .inbox-list::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: transparent;
 }
 
 .inbox-list::-webkit-scrollbar-thumb {
-  background: #ccc;
+  background: #d0d0d0;
   border-radius: 3px;
 }
 
 .inbox-list::-webkit-scrollbar-thumb:hover {
-  background: #aaa;
+  background: #b0b0b0;
 }
 
 .loading,

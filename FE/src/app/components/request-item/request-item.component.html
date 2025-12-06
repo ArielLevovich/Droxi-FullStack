@@ -1,51 +1,81 @@
-<div class="request-item" [class.unread]="!request.isRead">
-  <div class="request-header">
+<div class="request-card" [class.unread]="!request.isRead" [class.selected]="false" [ngClass]="[priorityClass, typeClass]">
+  <!-- Section 1: Header - Patient & Time -->
+  <div class="card-header">
     <div class="patient-info">
-      <img [src]="typeIcon" [alt]="request.type" class="type-icon" />      
-      <span class="patient-name">{{ request.patientName }}</span>
-      @if (request.abnormalResults && request.abnormalResults.length > 0) {
-        <span class="abnormal-icon-wrapper">
-          <img src="assets/icons/red-info.svg" alt="abnormal results" class="abnormal-icon" />
-          <span class="abnormal-tooltip">{{ abnormalResultsDisplay }}</span>
-        </span>
-      }
-      @if (request.isUrgent) {
-        <img src="assets/icons/icon-urgent.svg" alt="urgent" class="urgent-icon" title="Urgent" />
-      }
+      <div class="type-icon-container" [ngClass]="request.type">
+        <img [src]="typeIcon" [alt]="request.type" class="type-icon" />
+      </div>
+      <div class="patient-details">
+        <span class="patient-name">{{ request.patientName }}</span>
+        <span class="category-chip" [ngClass]="categoryClass">{{ categoryLabel }}</span>
+      </div>
     </div>
-    <span class="timestamp">{{ formattedTimestamp }}</span>
+    <div class="time-badge" [ngClass]="timeAgeClass" [title]="formattedTimestamp">
+      {{ relativeTime }}
+    </div>
   </div>
 
-  <div class="request-description" [title]="request.description">
-    @for (line of descriptionLines; track line) {
-      <div class="description-line">{{ line }}</div>
+  <!-- Section 2: Alerts (if any) - Prominent position -->
+  @if (hasAlerts) {
+    <div class="alerts-section">
+      @if (request.isUrgent) {
+        <div class="alert-badge urgent">
+          <img src="assets/icons/icon-urgent.svg" alt="urgent" class="alert-icon" />
+          <span class="alert-text">Urgent</span>
+        </div>
+      }
+      @if (request.abnormalResults && request.abnormalResults.length > 0) {
+        <div class="alert-badge attention">
+          <img src="assets/icons/red-info.svg" alt="abnormal" class="alert-icon" />
+          <span class="alert-text">{{ abnormalResultsDisplay }}</span>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Section 3: Content - Task Summary -->
+  <div class="content-section">
+    <div class="request-description" [title]="request.description">
+      @for (line of descriptionLines; track line) {
+        <div class="description-line">{{ line }}</div>
+      }
+    </div>
+
+    @if (request.recommendation?.recommendationValue === 'yes') {
+      <div class="recommendation">{{ request.recommendation?.recommendationDescription }}</div>
+    }
+
+    @if (request.type === 'labReport' && panelsCount > 0) {
+      <div class="panels-badge" [title]="panelsDisplay">
+        <img [src]="typeIcon" alt="panels" class="panels-icon" />
+        <span class="panels-count">{{ panelsCount }}</span>
+        <span class="panels-label">{{ panelsCount === 1 ? 'panel' : 'panels' }}</span>
+      </div>
     }
   </div>
 
-  @if (request.recommendation?.recommendationValue === 'yes') {
-    <div class="recommendation">{{ request.recommendation?.recommendationDescription }}</div>
-  }
-
-  <div class="request-footer">
-    <div class="footer-left">
-      <img src="assets/icons/hourglass.svg" alt="time" class="footer-icon" />
-      <span class="estimated-time">{{ estimatedTime }}</span>
-
-      @if (request.type === 'labReport' && request.panels && request.panels.length > 0) {
-        <img [src]="typeIcon" alt="panels" class="footer-icon panels-icon" />
-        <span class="panels-info" [title]="panelsDisplay">{{ panelsDisplay }}</span>
-      }
-
-      @if (request.labels && request.labels.length > 0) {
-        <img src="assets/icons/type.svg" alt="labels" class="footer-icon" />
-        @for (label of request.labels; track label) {
-          <span class="label">{{ label }}</span>
-        }
-      }
+  <!-- Section 4: Metadata Footer -->
+  <div class="metadata-section">
+    <div class="metadata-left">
+      <span class="metadata-item time-estimate">
+        <img src="assets/icons/hourglass.svg" alt="time" class="metadata-icon" />
+        <span class="metadata-text">{{ estimatedTime }}</span>
+      </span>
     </div>
-    <div class="footer-right">
-      <img src="assets/icons/assign.svg" alt="assigned" class="footer-icon" />
-      <span class="assigned-to">{{ request.assignment.assignedTo }}</span>
+    <div class="metadata-right">
+      <div class="doctor-assignment" [title]="request.assignment.assignedTo">
+        <span class="doctor-avatar">{{ doctorInitials }}</span>
+        <span class="doctor-name">{{ request.assignment.assignedTo }}</span>
+      </div>
     </div>
   </div>
+
+  <!-- Labels (if any) -->
+  @if (request.labels && request.labels.length > 0) {
+    <div class="labels-section">
+      @for (label of request.labels; track label) {
+        <span class="label">{{ label }}</span>
+      }
+    </div>
+  }
 </div>

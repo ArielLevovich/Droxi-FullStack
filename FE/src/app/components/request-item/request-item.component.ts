@@ -22,6 +22,45 @@ export class RequestItemComponent {
     return this.iconMap[this.request.type] || 'assets/icons/icon-unknown.svg';
   }
 
+  get priorityClass(): string {
+    if (this.request.isUrgent) return 'priority-urgent';
+    if (this.request.abnormalResults?.length) return 'priority-attention';
+    return 'priority-routine';
+  }
+
+  get priorityBadgeClass(): string {
+    if (this.request.isUrgent) return 'urgent';
+    if (this.request.abnormalResults?.length) return 'attention';
+    return '';
+  }
+
+  get priorityLabel(): string {
+    if (this.request.isUrgent) return 'Urgent';
+    if (this.request.abnormalResults?.length) return 'Attention';
+    return '';
+  }
+
+  get typeClass(): string {
+    return `type-${this.request.type}`;
+  }
+
+  get categoryLabel(): string {
+    const labels: Record<RequestType, string> = {
+      renewal: 'Medication',
+      labReport: 'Lab Results',
+      freeText: 'Message'
+    };
+    return labels[this.request.type] || 'Request';
+  }
+
+  get categoryClass(): string {
+    return `category-${this.request.type}`;
+  }
+
+  get hasAlerts(): boolean {
+    return !!(this.request.abnormalResults?.length || this.request.isUrgent);
+  }
+
   get formattedTimestamp(): string {
     const date = new Date(this.request.lastModifiedDate);
     const hours = date.getHours().toString().padStart(2, '0');
@@ -30,6 +69,47 @@ export class RequestItemComponent {
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
     const year = date.getFullYear();
     return `${hours}:${minutes} ${day}/${month}/${year}`;
+  }
+
+  get relativeTime(): string {
+    const now = new Date();
+    const date = new Date(this.request.lastModifiedDate);
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+
+    if (diffMins < 1) return 'Just now';
+    if (diffMins < 60) return `${diffMins} min. ago`;
+    if (diffHours < 24) return `${diffHours} hr. ago`;
+    if (diffDays === 1) return 'Yesterday';
+    if (diffDays < 7) return `${diffDays} days ago`;
+    return `${Math.floor(diffDays / 7)} wk. ago`;
+  }
+
+  get timeAgeClass(): string {
+    const now = new Date();
+    const date = new Date(this.request.lastModifiedDate);
+    const diffMs = now.getTime() - date.getTime();
+    const diffHours = diffMs / (1000 * 60 * 60);
+
+    if (diffHours < 1) return 'age-recent';
+    if (diffHours < 24) return 'age-today';
+    if (diffHours < 72) return 'age-aging';
+    return 'age-old';
+  }
+
+  get doctorInitials(): string {
+    const name = this.request.assignment.assignedTo;
+    const parts = name.replace(/^(Dr\.|Dr|MD|M\.D\.)\s*/i, '').trim().split(' ');
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    }
+    return parts[0]?.substring(0, 2).toUpperCase() || '??';
+  }
+
+  get panelsCount(): number {
+    return this.request.panels?.length || 0;
   }
 
   get estimatedTime(): string {
