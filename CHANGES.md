@@ -194,6 +194,26 @@ npm test -- --coverage  # With coverage report
 - Uses `jest.spyOn()` instead of `spyOn()`
 - No browser required - tests run in jsdom environment
 
+## Known Vulnerabilities
+
+The frontend project has 19 npm vulnerabilities (6 low, 3 moderate, 10 high).
+
+**Applied:** `npm audit fix` to address non-breaking issues.
+
+**Remaining High Vulnerabilities:**
+- Angular core packages (18.x) - XSRF Token Leakage via Protocol-Relative URLs
+- Angular compiler (18.x) - Stored XSS via SVG Animation/MathML Attributes
+- esbuild, vite, tmp - Development-only vulnerabilities (don't affect production builds)
+
+**Resolution:**
+These vulnerabilities require upgrading to Angular 19.x or 21.x, which are breaking changes. Decided to stay on Angular 18 for now because:
+1. The XSRF vulnerability only affects apps using protocol-relative URLs with XSRF tokens
+2. The XSS vulnerability only affects apps rendering untrusted SVG/MathML content
+3. Development-only vulnerabilities don't impact production builds
+
+**Future Upgrade Path:**
+When ready to upgrade, use: `ng update @angular/core@19 @angular/cli@19`
+
 ## API Endpoints
 
 | Method | Endpoint | Description |
