@@ -32,6 +32,45 @@
   height: 20px;
 }
 
+.urgent-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.abnormal-icon-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.abnormal-icon {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+.abnormal-tooltip {
+  visibility: hidden;
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #fff;
+  color: #d32f2f;
+  font-weight: 700;
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 4px;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 100;
+  margin-bottom: 4px;
+}
+
+.abnormal-icon-wrapper:hover .abnormal-tooltip {
+  visibility: visible;
+}
+
 .patient-name {
   font-weight: 500;
   font-size: 14px;
@@ -51,8 +90,26 @@
   overflow: hidden;
   text-overflow: ellipsis;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 3;
   -webkit-box-orient: vertical;
+}
+
+.abnormal-results {
+  margin-bottom: 8px;
+}
+
+.abnormal-result {
+  font-size: 13px;
+  font-weight: 700;
+  color: #d32f2f;
+  line-height: 1.4;
+}
+
+.recommendation {
+  font-size: 13px;
+  color: #555;
+  margin-bottom: 8px;
+  line-height: 1.4;
 }
 
 .request-footer {

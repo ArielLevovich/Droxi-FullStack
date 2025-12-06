@@ -1,15 +1,30 @@
 <div class="request-item" [class.unread]="!request.isRead">
   <div class="request-header">
     <div class="patient-info">
-      <img [src]="typeIcon" [alt]="request.type" class="type-icon" />
+      <img [src]="typeIcon" [alt]="request.type" class="type-icon" />      
       <span class="patient-name">{{ request.patientName }}</span>
+      @if (request.abnormalResults && request.abnormalResults.length > 0) {
+        <span class="abnormal-icon-wrapper">
+          <img src="assets/icons/red-info.svg" alt="abnormal results" class="abnormal-icon" />
+          <span class="abnormal-tooltip">{{ abnormalResultsDisplay }}</span>
+        </span>
+      }
+      @if (request.isUrgent) {
+        <img src="assets/icons/icon-urgent.svg" alt="urgent" class="urgent-icon" title="Urgent" />
+      }
     </div>
     <span class="timestamp">{{ formattedTimestamp }}</span>
   </div>
 
-  <div class="request-description">
-    {{ request.description }}
+  <div class="request-description" [title]="request.description">
+    @for (line of descriptionLines; track line) {
+      <div class="description-line">{{ line }}</div>
+    }
   </div>
+
+  @if (request.recommendation?.recommendationValue === 'yes') {
+    <div class="recommendation">{{ request.recommendation?.recommendationDescription }}</div>
+  }
 
   <div class="request-footer">
     <div class="footer-left">
@@ -18,7 +33,7 @@
 
       @if (request.type === 'labReport' && request.panels && request.panels.length > 0) {
         <img [src]="typeIcon" alt="panels" class="footer-icon panels-icon" />
-        <span class="panels-info">{{ panelsDisplay }}</span>
+        <span class="panels-info" [title]="panelsDisplay">{{ panelsDisplay }}</span>
       }
 
       @if (request.labels && request.labels.length > 0) {

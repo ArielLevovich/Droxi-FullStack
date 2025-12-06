@@ -51,4 +51,20 @@ export class RequestItemComponent {
     }
     return this.request.panels.join(', ');
   }
+
+  get descriptionLines(): string[] {
+    if (!this.request.description) {
+      return [];
+    }
+    // Split by date pattern [MM/DD/YY] but keep the delimiter with each part
+    const parts = this.request.description.split(/(?=\[\d{2}\/\d{2}\/\d{2}\])/);
+    return parts.map(part => part.trim()).filter(part => part.length > 0);
+  }
+
+  get abnormalResultsDisplay(): string {
+    if (!this.request.abnormalResults || this.request.abnormalResults.length === 0) {
+      return '';
+    }
+    return this.request.abnormalResults.join(', ');
+  }
 }
