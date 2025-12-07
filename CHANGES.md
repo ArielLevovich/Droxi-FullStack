@@ -168,7 +168,7 @@ Server runs on `http://localhost:3000`
 ```bash
 cd FE
 npm install
-ng serve
+npx ng serve
 ```
 Application runs on `http://localhost:4200`
 
